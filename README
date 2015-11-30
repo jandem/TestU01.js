@@ -1,0 +1,12 @@
+TestU01 compiled to asm.js with Emscripten.
+
+testu01.test.js was compiled as follows, if I remember correctly:
+
+* Install Emscripten
+* Download TestU01 from http://simul.iro.umontreal.ca/testu01/tu01.html
+* Extract TestU01
+* emconfigure ./configure
+* emmake ./make
+* emcc -O3 test.c testu01/.libs/libtestu01.a mylib/.libs/libmylib.a probdist/.libs/libprobdist.a -o testu01.test.js -I /usr/local/include/ -s TOTAL_MEMORY=536870912
+
+I got some compilation failures in some ancient-looking C file(s). It was trivial to fix them, though.

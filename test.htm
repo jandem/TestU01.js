@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TestU01.js</title>
+<script>
+var worker = new Worker("worker.js");
+
+function start() {
+    var battery = document.getElementById("battery").value;
+    var numTests = 0;
+    switch (battery) {
+        case "SmallCrush": numTests = 10; break;
+        case "Crush": numTests = 96; break;
+        case "BigCrush": numTests = 106; break;
+        default: console.error("Invalid battery"); return;
+    }
+    var done = false;
+    var curTest = 0;
+    var t0 = new Date;
+    worker.postMessage(battery);
+    document.getElementById("battery").disabled = true;
+    worker.onmessage = function(e) {
+        if (typeof e.data.output === "string") {
+            if (e.data.output.indexOf("HOST =") >= 0) {
+                curTest++;
+            }
+            var output = document.getElementById("output");
+            output.value += e.data.output + "\n";
+            output.scrollTop = output.scrollHeight;
+            return;
+        }
+        if (e.data.done === true) {
+            done = true;
+            return;
+        }
+    }
+    document.getElementById("start").disabled = true;
+
+    var interval = setInterval(function() {
+       var sec = ((new Date - t0) / 1000)|0;
+       var status = done ? "Done." : "Running...";
+       status += " (" + sec + " seconds";
+       if (!done) {
+           status += ", test " + curTest + " of " + numTests;
+       }
+       status += ")";
+       document.getElementById("status").innerHTML = status;
+       if (done)
+           clearInterval(interval);
+    }, 500);
+}
+</script>
+
+<style>
+body { font-family: sans-serif; }
+</style>
+</head>
+
+<body>
+
+<form>
+Suite:
+<select id="battery">
+<option>SmallCrush</option>
+<option>Crush</option>
+<option>BigCrush</option>
+</select>
+<span style="font-size:11px">(warning: running Crush and BigCrush will take a long time!)</span>
+</form>
+<button onclick="start()" id="start">Start!</button>
+<hr>
+<span id="status">Ready</span><br>
+<textarea id="output" style="width:800px; height:500px; font-family:monospace; font-size:11px;"></textarea>
+</body>
+</html>
